@@ -66,6 +66,9 @@
       <HintPath>packages\GHIElectronics.TinyCLR.Devices.Spi.3.0.2.1000\lib\net48\System.Device.Spi.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="license.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
