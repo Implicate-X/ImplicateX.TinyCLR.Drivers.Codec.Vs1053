@@ -1,102 +1,157 @@
-﻿# ImplicateX.TinyCLR.Drivers.Decoder.Ls7366
+﻿📘 README.md
 
-A high‑precision 32‑bit quadrature decoder for TinyCLR OS 3.x based on the LS7366R hardware counter.  
-Unlike software‑based rotary encoder solutions, the LS7366R provides dropout‑free, skip‑free, fully deterministic counting — ideal for mechanical encoders such as the EC11.
+# VS1053B TinyCLR Driver  
+A robust, fully re-engineered TinyCLR driver for the **VS1053B audio codec**, optimized for MP3/WAV streaming, strict SCI/SDI domain separation, deterministic DREQ synchronization, and stable operation across FEZ Duino, SITCore boards, and Adafruit Music Maker.
+
+This driver corrects structural issues found in the original GHI implementation and provides a technically accurate, empirically validated architecture for reliable audio playback under TinyCLR OS.
+
+---
 
 ## ✨ Features
 
-- True hardware quadrature decoding (1×, 2×, 4×)
-- 32‑bit counter width
-- Stable SPI communication via TinyCLR Software‑SPI
-- Event‑driven detent reporting (`CounterChanged`)
-- Direction detection via LS7366R status register
-- Detent alignment using configurable divider (default: 4)
-- Full register access (MDR0, MDR1, CNTR, OTR, STR)
-- Counter reset and load operations
-- Thread‑safe implementation
+- **Separate SPI domains**
+  - SCI (control-plane) @ **250 kHz**
+  - SDI (stream-plane) @ **4 MHz**
+  - Matches the VS1053B’s internal timing expectations.
+
+- **Manual chip-select via GPIO**
+  - Ensures stable transactions on both SCI and SDI channels.
+
+- **Strict DREQ synchronization**
+  - Deterministic data flow, no decoder underruns.
+
+- **Robust hardware reset sequence**
+  - Stable boot path compatible with Adafruit Music Maker and generic VS1053 boards.
+
+- **MP3 and WAV streaming**
+  - ID3v2 skipping  
+  - 512-byte chunk streaming  
+  - Tail-byte handling  
+  - VS10xx-compliant filler flush
+
+- **Sine test mode**
+  - Quick hardware validation.
+
+- **Realtime MIDI bootstrap (SCI-based)**
+  - Optional UART-MIDI path for Music Maker boards.
+
+- **Thread-safe SPI access**
+
+---
 
 ## 📦 Installation
 
-Install via NuGet:
-Install-Package ImplicateX.TinyCLR.Drivers.Decoder.Ls7366
+Add the class to your TinyCLR project or include it as a standalone NuGet package.
 
-Dependencies:
+---
 
-- GHIElectronics.TinyCLR.Core (≥ 3.0.1.6000)
-- GHIElectronics.TinyCLR.Devices.Gpio (≥ 3.0.1.6000)
-- GHIElectronics.TinyCLR.Native (≥ 3.0.1.6000)
+## 🧩 Hardware Setup
 
-## 🔧 Hardware Requirements
+### Required pins
+- **CMD_CS** – SCI chip-select  
+- **DAT_CS** – SDI chip-select  
+- **DREQ** – Data Request (must be wired correctly)  
+- **RESET** – Hardware reset  
+- **SPI** – Shared bus for SCI and SDI
 
-- LS7366R quadrature decoder IC  
-- EC11 or compatible mechanical rotary encoder  
-- 4 GPIO pins for Software‑SPI (SCLK, MOSI, MISO, CS)  
-- TinyCLR‑compatible SITCore board  
+### Supported boards
+- FEZ Duino  
+- SITCore SC20100 / SC20260  
+- Adafruit Music Maker (SPI path only, SDI-MIDI disabled)
 
-## 🚀 Usage Example (Modern C#)
+---
+
+## 🚀 Quickstart
+
+### Initialize
 
 ```csharp
-// LS7366R Quadrature Decoder/Counter
-quadDecoder_ = new(
-    gpioController_,
-    ControllerPin.DecoderCS,
-    ControllerPin.DecoderSCLK,
-    ControllerPin.DecoderMOSI,
-    ControllerPin.DecoderMISO
-);
+var codec = new Vs1053(
+    spiControllerName: "SPI1",
+    cmdCsPinID: 5,
+    datCsPinID: 6,
+    dreqPinID: 7,
+    resetPinID: 8);
 
-// Subscribe to detent events
-quadDecoder_.CounterChanged += decoderEvent =>
-{
-    double frequency = decoderEvent.Direction switch
-    {
-        Direction.Up   => ApplyTuneStep(+0.1, "Tune Up command received."),
-        Direction.Down => ApplyTuneStep(-0.1, "Tune Down command received."),
-        _              => tuner_.GetFrequencyMHz()
-    };
-};
+codec.Initialize();
+codec.SetVolume(200, 200);
 
-// Reset and start polling
-quadDecoder_.ResetCounter();
-quadDecoder_.Start();
+Play MP3
+codec.PlayMp3(@"D:\music\track01.mp3");
 
-📡 How It Works
-The decoder operates on a fixed 5 ms polling interval.
-Each poll performs:
-Latching the counter into the OTR register
-Reading the 32‑bit counter value
-Reading the status register
-Determining movement direction
-Mapping raw counts to detent counts (counter / 4)
-Raising CounterChanged when a new detent boundary is reached
-All SPI operations are synchronized using an internal lock.
+Play WAV
+codec.PlayWav(@"D:\sounds\effect.wav");
 
-📑 API Overview
-Ls7366
-Start() / Stop()
-ReadCounter()
-ReadStatus()
-ResetCounter()
-LoadCounter(long value)
-ConfigureForEc11()
-CounterChanged event
-ChangedEventArgs
-Count — detent‑aligned count
-RawCount — raw LS7366R counter value
-Direction — Up / Down / Unknown
-Status — raw status register byte
+Sine Test
+codec.RunStartupSineTest();
 
-Direction
-Up
-Down
-Unknown
+⚙️ Architecture Overview
 
-🛠 Debugging
-csharp
-decoder.DumpRegisters();
-Outputs:
-MDR0
-MDR1
-CNTR
-OTR
-STR (with decoded bit flags)
+SCI (Control-plane)
+Register access
+Clock configuration
+Status/health checks
+Soft reset
+Sine test mode
+Realtime MIDI bootstrap
+→ 250 kHz for maximum stability.
+SDI (Stream-plane)
+MP3 bitstream
+WAV data
+Filler bytes
+Streaming chunks
+→ 4 MHz for stable playback of large MP3 files.
+
+DREQ
+The VS1053B’s only true synchronization anchor.The driver strictly waits for DREQ-high before every SDI operation.
+
+🛡️ Improvements over GHI Driver
+
+This driver resolves the following issues in the original GHI implementation:
+Issue
+Fix
+SCI & SDI share same SPI clock
+independent frequencies (250 kHz / 4 MHz)
+SPI device recreated per call
+static instances
+DREQ wait without timeout
+bounded timeout + exception
+Tail bytes dropped
+full tail handling
+No synchronization
+global SPI lock
+Weak init verification
+full register health checks
+Unstable streaming path
+deterministic chunk pipeline
+
+📁 Supported Formats
+
+MP3
+ID3v2 skip
+512-byte streaming
+2052 filler flush
+DECODE_TIME check
+WAV
+Direct streaming without header manipulation
+
+🎵 MIDI
+
+Realtime MIDI over SCI is supported (as used internally by Adafruit Music Maker).
+MIDI over SDI is intentionally disabled, because Music Maker boards pull GPIO0 permanently low.
+
+🧪 Diagnostics
+
+RunStartupSineTest()
+CommandRead() / CommandWrite()
+SoftReset()
+EnableAnalogPath()
+WaitDreqStableHigh()
+
+📜 License
+
+See license.txt — fully permissive, free for all use.
+
+🤝 Contributing
+
+Pull requests welcome.This driver is intended as a reference implementation for stable, reproducible audio pipelines under TinyCLR OS.

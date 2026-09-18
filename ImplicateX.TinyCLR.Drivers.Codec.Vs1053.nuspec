@@ -16,8 +16,10 @@
     <dependencies>
       <group targetFramework="net48">
         <dependency id="GHIElectronics.TinyCLR.Core" version="3.0.2.1000" />
+        <dependency id="GHIElectronics.TinyCLR.Native" version="3.0.2.1000" />     
+        <dependency id="GHIElectronics.TinyCLR.IO" version="3.0.2.1000" />      
         <dependency id="GHIElectronics.TinyCLR.Devices.Gpio" version="3.0.2.1000" />      
-        <dependency id="GHIElectronics.TinyCLR.Native" version="3.0.2.1000" />      
+        <dependency id="GHIElectronics.TinyCLR.Devices.Spi" version="3.0.2.1000" />      
       </group>
     </dependencies>
   </metadata>
