@@ -3,7 +3,7 @@
 # VS1053B TinyCLR Driver  
 A robust, fully re-engineered TinyCLR driver for the **VS1053B audio codec**, optimized for MP3/WAV streaming, strict SCI/SDI domain separation, deterministic DREQ synchronization, and stable operation across FEZ Duino, SITCore boards, and Adafruit Music Maker.
 
-This driver corrects structural issues found in the original GHI implementation and provides a technically accurate, empirically validated architecture for reliable audio playback under TinyCLR OS.
+This driver corrects structural issues found in several implementations in C++ and provides a technically accurate, empirically validated architecture for reliable audio playback under TinyCLR OS.
 
 ---
 
