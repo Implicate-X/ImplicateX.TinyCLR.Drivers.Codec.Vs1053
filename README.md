@@ -105,66 +105,68 @@ codec.RunStartupSineTest();
 ```
 ⚙️ Architecture Overview
 
-SCI (Control-plane)
-Register access
-Clock configuration
-Status/health checks
-Soft reset
-Sine test mode
-Realtime MIDI bootstrap
-→ 250 kHz for maximum stability.
-SDI (Stream-plane)
-MP3 bitstream
-WAV data
-Filler bytes
-Streaming chunks
-→ 4 MHz for stable playback of large MP3 files.
+- **SCI (Control-plane)**
+  - Register access
+  - Clock configuration
+  - Status/health checks
+  - Soft reset
+  - Sine test mode
+  - Realtime MIDI bootstrap
+    → 250 kHz for maximum stability.
 
-DREQ
-The VS1053B’s only true synchronization anchor.The driver strictly waits for DREQ-high before every SDI operation.
+- **SDI (Stream-plane)**
+  - MP3 bitstream
+  - WAV data
+  - Filler bytes
+  - Streaming chunks
+    → 4 MHz for stable playback of large MP3 files.
+
+- **DREQ**
+  The VS1053B’s only true synchronization anchor. The driver strictly waits for DREQ-high before every SDI operation.
 
 🛡️ Improvements over GHI Driver
 
 This driver resolves the following issues in the original GHI implementation:
-Issue
-Fix
-SCI & SDI share same SPI clock
-independent frequencies (250 kHz / 4 MHz)
-SPI device recreated per call
-static instances
-DREQ wait without timeout
-bounded timeout + exception
-Tail bytes dropped
-full tail handling
-No synchronization
-global SPI lock
-Weak init verification
-full register health checks
-Unstable streaming path
-deterministic chunk pipeline
+- **Issue**
+  **Fix**
+- SCI & SDI share same SPI clock
+  independent frequencies (250 kHz / 4 MHz)
+- SPI device recreated per call
+  static instances
+- DREQ wait without timeout
+  bounded timeout + exception
+- Tail bytes dropped
+  full tail handling
+- No synchronization
+  global SPI lock
+- Weak init verification
+  full register health checks
+- Unstable streaming path
+  deterministic chunk pipeline
 
 📁 Supported Formats
 
-MP3
-ID3v2 skip
-512-byte streaming
-2052 filler flush
-DECODE_TIME check
-WAV
-Direct streaming without header manipulation
+- **MP3**
+  - ID3v2 skip
+  - 512-byte streaming
+  - 2052 filler flush
+  - DECODE_TIME check
+	- 
+- **WAV**
+  - Direct streaming without header manipulation
 
 🎵 MIDI
 
-Realtime MIDI over SCI is supported (as used internally by Adafruit Music Maker).
-MIDI over SDI is intentionally disabled, because Music Maker boards pull GPIO0 permanently low.
+- Realtime MIDI over SCI is supported (as used internally by Adafruit Music Maker).
+- MIDI over SDI is intentionally disabled, because Music Maker boards pull GPIO0 permanently low.
 
 🧪 Diagnostics
 
-RunStartupSineTest()
-CommandRead() / CommandWrite()
-SoftReset()
-EnableAnalogPath()
-WaitDreqStableHigh()
+- **RunStartupSineTest()**
+- **CommandRead() / CommandWrite()**
+- **SoftReset()**
+- **EnableAnalogPath()**
+- **WaitDreqStableHigh()**
 
 📜 License
 
@@ -172,4 +174,4 @@ See license.txt — fully permissive, free for all use.
 
 🤝 Contributing
 
-Pull requests welcome.This driver is intended as a reference implementation for stable, reproducible audio pipelines under TinyCLR OS.
+Pull requests welcome. This driver is intended as a reference implementation for stable, reproducible audio pipelines under TinyCLR OS.
