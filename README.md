@@ -56,8 +56,8 @@ Add the class to your TinyCLR project or include it as a standalone NuGet packag
 
 ### Supported boards
 - e.g. FEZ Duino  
-- SITCore SC13048/ SC20100 / SC20260  
-- Adafruit Music Maker (SPI path only, SDI-MIDI disabled)
+- SITCore SC13048 / SC20100 / SC20260  
+- e.g. Adafruit Music Maker (SPI path only, SDI-MIDI disabled)
 
 ---
 
@@ -66,15 +66,32 @@ Add the class to your TinyCLR project or include it as a standalone NuGet packag
 ### Initialize
 
 ```csharp
-var codec = new Vs1053(
-    spiControllerName: "SPI1",
-    cmdCsPinID: 5,
-    datCsPinID: 6,
-    dreqPinID: 7,
-    resetPinID: 8);
+using GHIElectronics.TinyCLR.Pins;
+using ImplicateX.Drivers.Codec;
 
-codec.Initialize();
-codec.SetVolume(200, 200);
+namespace Vs1053App
+{
+	internal class Program
+	{
+		private static Vs1053 codec;
+
+		static void Main()
+		{
+			_ = new Storage();
+
+			codec = new Vs1053( 
+				spiControllerName: FEZDuino.SpiBus.Spi6, 
+				cmdCsPinID: FEZDuino.GpioPin.PC4, 
+				datCsPinID: FEZDuino.GpioPin.PC5, 
+				dreqPinID: FEZDuino.GpioPin.PC6, 
+				resetPinID: FEZDuino.GpioPin.PC7 );
+
+			codec.Initialize();
+			codec.PlayMp3( @"A:\TEST.MP3" );
+		}
+	}
+}
+
 
 Play MP3
 codec.PlayMp3(@"D:\music\track01.mp3");
