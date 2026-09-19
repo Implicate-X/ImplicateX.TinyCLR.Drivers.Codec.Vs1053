@@ -102,7 +102,7 @@ codec.PlayWav(@"D:\sounds\effect.wav");
 Sine Test
 codec.RunStartupSineTest();
 
-```text
+```markdown
 ⚙️ Architecture Overview
 
 SCI (Control-plane)
