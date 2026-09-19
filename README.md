@@ -55,8 +55,8 @@ Add the class to your TinyCLR project or include it as a standalone NuGet packag
 - **SPI** – Shared bus for SCI and SDI
 
 ### Supported boards
-- FEZ Duino  
-- SITCore SC20100 / SC20260  
+- e.g. FEZ Duino  
+- SITCore SC13048/ SC20100 / SC20260  
 - Adafruit Music Maker (SPI path only, SDI-MIDI disabled)
 
 ---
