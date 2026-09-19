@@ -150,8 +150,8 @@ This driver resolves the following issues in the original GHI implementation:
   - ID3v2 skip
   - 512-byte streaming
   - 2052 filler flush
-  - DECODE_TIME check
-	- 
+  - 'DECODE_TIME' check
+
 - **WAV**
   - Direct streaming without header manipulation
 
